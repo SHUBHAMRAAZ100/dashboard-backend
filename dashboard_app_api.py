@@ -3,27 +3,13 @@ Simulation -> Fixed -> Highlight Tracker (API-connected version)
 ------------------------------------------------------------------
 This version does NOT read the CSV directly. It fetches data from the
 backend API (main.py) over HTTP -- the way a real frontend/backend split works.
-
-HOW TO RUN:
-1. Start the backend first, in its own terminal:
-     cd backend
-     pip install fastapi uvicorn pandas
-     uvicorn main:app --reload
-   Leave that terminal running.
-
-2. In a SECOND terminal, run this dashboard:
-     pip install streamlit requests
-     streamlit run dashboard_app_api.py
-
-3. If you deploy the backend to Render, change API_BASE_URL below to your
-   Render URL (e.g. "https://your-app-name.onrender.com") instead of localhost.
 """
 
 import pandas as pd
 import requests
 import streamlit as st
 
-API_BASE_URL = "https://dashboard-backend-7pgp.onrender.com"   # change this to your Render URL after deploying
+API_BASE_URL = "https://dashboard-backend-7pgp.onrender.com"
 MONTHS = ["April", "May", "June", "July"]
 
 st.set_page_config(page_title="Simulation Cycle Dashboard", layout="wide")
@@ -50,7 +36,6 @@ def fetch_trend():
     return pd.DataFrame(r.json()).T
 
 
-# ---------- Try connecting to the API first (allow extra time for Render cold start) ----------
 try:
     with st.spinner("Connecting to backend (may take up to a minute if it was asleep)..."):
         requests.get(f"{API_BASE_URL}/", timeout=60).raise_for_status()
@@ -61,7 +46,6 @@ except Exception:
     )
     st.stop()
 
-# ---------- Header ----------
 st.markdown("##### PROCESS CYCLE DASHBOARD")
 st.title("Simulation → Fixed → Highlight Tracker")
 st.caption(
@@ -71,7 +55,6 @@ st.caption(
 )
 st.divider()
 
-# ---------- Month selector + View button ----------
 col_a, col_b = st.columns([2, 3])
 with col_a:
     selected_month = st.selectbox("Choose a month", MONTHS, index=0)
@@ -88,7 +71,6 @@ with col_b:
 
 st.write("")
 
-# ---------- Big stat cards (from API) ----------
 summary = fetch_summary(shown_month)
 
 c1, c2, c3 = st.columns(3)
